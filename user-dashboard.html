@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Usuario - Diamante macanal</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="brand">
+            <img src="images/logo.png" alt="Hotel Logo" class="site-logo">
+            Panel Cliente
+        </div>
+        <nav class="main-nav">
+            <a href="index.html">Inicio</a>
+            <a href="cabanas.html">Cabañas</a>
+            <a href="index.html#acerca">Acerca de nosotros</a>
+            <span id="nav-greeting" style="display:none; color:var(--primary); font-weight:600; font-size:0.9rem;"></span>
+            <a href="login.html" id="nav-login">Login</a>
+            <a href="register.html" id="nav-register">Registro</a>
+            <a href="user-dashboard.html" id="nav-mi-cuenta" style="display:none;" class="active">Mi cuenta</a>
+            <a href="#" id="nav-logout" style="display:none;">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <main class="dashboard-panel user-dashboard">
+        <section class="user-summary">
+            <div class="info-card"><h3>Reservas activas</h3><p id="userActive">2</p></div>
+            <div class="info-card"><h3>Próxima llegada</h3><p id="userNext">24 Abril</p></div>
+            <div class="info-card"><h3>Estado</h3><p>Confirmado</p></div>
+        </section>
+
+        <section class="section-panel">
+            <h2>Buscar disponibilidad</h2>
+            <form id="searchAvailability" class="form-grid">
+                <label>Fecha <input type="date" id="searchDate" required></label>
+                <label>Tipo de cabaña:
+                    <select id="searchType" required>
+                        <option value="suite">Diamante 1</option>
+                        <option value="familiar">Diamante 2</option>
+                        <option value="romantica">Diamante 3</option>
+                    </select>
+                </label>
+                <button type="submit" class="btn-primary">Buscar</button>
+            </form>
+            <div id="searchResults" class="cards"></div>
+        </section>
+
+        <section class="section-panel">
+            <h2>Mis reservas</h2>
+            <div class="reservation-list" id="userReservations">
+                <article class="reservation-card">
+                    <h3>Cabaña Diamante 1 N°1</h3>
+                    <p>Fecha: 24-26 Abril</p>
+                    <p>Estado: Confirmada</p>
+                    <button class="btn-secondary">Modificar</button>
+                    <button class="btn-ghost">Cancelar</button>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cabañas - Diamante macanal</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="brand">
+            <img src="images/logo.png" alt="Hotel Logo" class="site-logo">
+            Diamante <span style="color: var(--primary);">macanal</span>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html">Inicio</a>
+            <a href="cabanas.html" class="active">Cabañas</a>
+            <a href="index.html#acerca">Acerca de nosotros</a>
+            <span id="nav-greeting" style="display:none; color:var(--primary); font-weight:600; font-size:0.9rem;"></span>
+            <a href="login.html" id="nav-login">Login</a>
+            <a href="register.html" id="nav-register">Registro</a>
+            <a href="user-dashboard.html" id="nav-mi-cuenta" style="display:none;">Mi cuenta</a>
+            <a href="#" id="nav-logout" style="display:none;">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="section-panel bg-white">
+            <div class="section-panel-content">
+                <div class="section-header">
+                    <h2>Nuestras Cabañas</h2>
+                    <p>Explora nuestras 4 exclusivas opciones y verifica disponibilidad inmediatamente.</p>
+                </div>
+                <div class="cards" id="cabanasPageList" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:2rem;">
+                    <!-- JS will render the 4 cabins here with their reservation boxes -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 Diamante macanal. Sistema de gestión hotelera.</p>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

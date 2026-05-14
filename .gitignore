@@ -1,0 +1,22 @@
+# Java
+*.class
+*.jar
+*.war
+backend-java/target/
+backend-java/.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# Node.js (backend anterior)
+server/node_modules/
+
+# Base de datos local NeDB (backend anterior)
+data/*.db
+
+# OS
+Thumbs.db
+.DS_Store

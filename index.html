@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diamante macanal - Inicio</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="brand">
+            <img src="images/logo.png" alt="Hotel Logo" class="site-logo">
+            Diamante <span style="color: var(--primary);">macanal</span>
+        </div>
+        <nav class="main-nav">
+            <a href="index.html" class="active">Inicio</a>
+            <a href="cabanas.html">Cabañas</a>
+            <a href="#acerca">Acerca de nosotros</a>
+            <span id="nav-greeting" style="display:none; color:var(--primary); font-weight:600; font-size:0.9rem;"></span>
+            <a href="login.html" id="nav-login">Login</a>
+            <a href="register.html" id="nav-register">Registro</a>
+            <a href="user-dashboard.html" id="nav-mi-cuenta" style="display:none;">Mi cuenta</a>
+            <a href="#" id="nav-logout" style="display:none;">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-copy">
+                <h1>Vive la experiencia de cabañas en plena naturaleza</h1>
+                <p>Reserva en línea, consulta disponibilidad y descubre la gestión ideal para tu estadía.</p>
+                <a href="cabanas.html" class="btn-primary">Reserva ahora</a>
+            </div>
+        </section>
+
+        <section id="disponibilidad" class="section-panel bg-white">
+            <div class="section-panel-content">
+                <div class="section-header">
+                    <h2>Consulta de disponibilidad</h2>
+                    <p>Explora nuestras cabañas disponibles y sus detalles.</p>
+                </div>
+                <div class="filter-panel">
+                <label>Tipo de cabaña:
+                    <select id="filterType">
+                        <option value="todas">Todas</option>
+                        <option value="suite">Diamante 1</option>
+                        <option value="familiar">Diamante 2</option>
+                        <option value="romantica">Diamante 3</option>
+                    </select>
+                </label>
+            </div>
+                <div class="cards" id="cabañaCards"></div>
+            </div>
+        </section>
+
+
+
+        <section id="acerca" class="section-panel bg-white">
+            <div class="section-panel-content">
+                <div class="section-header">
+                    <h2>Acerca de la empresa</h2>
+                    <p>Somos una experiencia hotelera que combina confort y naturaleza para viajeros exigentes.</p>
+                </div>
+                <div class="info-cards">
+                <div class="info-card">
+                    <h3>Atención personalizada</h3>
+                    <p>Gestión de reservas, pagos y soporte para cada cliente.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Infraestructura</h3>
+                    <p>Cabañas equipadas, espacios seguros y servicios exclusivos.</p>
+                </div>
+                <div class="info-card">
+                    <h3>Fácil acceso</h3>
+                    <p>Plataforma interactiva con navegación clara y funcionalidad móvil.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 Diamante macanal. Sistema de gestión hotelera.</p>
+    </footer>
+
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error("GLOBAL ERROR DETECTED:", e.message, "at", e.filename, ":", e.lineno);
+            document.body.insertAdjacentHTML('afterbegin', '<div style="background:red;color:white;padding:20px;z-index:9999;position:fixed;top:0;left:0;">ERROR: ' + e.message + ' en ' + e.lineno + '</div>');
+        });
+    </script>
+    <script src="js/app.js"></script>
+</body>
+</html>

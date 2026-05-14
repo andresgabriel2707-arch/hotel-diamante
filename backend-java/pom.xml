@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.diamante</groupId>
+    <artifactId>hotel-diamante-backend</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
+    <name>Hotel Diamante Backend</name>
+    <description>Backend Java con JDBC para el sistema de reservas Hotel Diamante</description>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- MySQL Connector — Driver JDBC -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.3.0</version>
+        </dependency>
+
+        <!-- BCrypt — Hash de contraseñas -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <!-- JWT — Tokens de autenticación -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+
+        <!-- Gson — Serialización JSON -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Plugin para ejecutar con: mvn exec:java -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <mainClass>com.diamante.Main</mainClass>
+                </configuration>
+            </plugin>
+            <!-- Plugin para compilar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

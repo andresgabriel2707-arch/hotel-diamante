@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Diamante macanal</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="admin-header">
+        <div class="brand">
+            <img src="images/logo.png" alt="Hotel Logo" class="site-logo">
+            Admin Diamante <span style="color: var(--primary);">macanal</span>
+        </div>
+        <nav class="admin-nav">
+            <button class="tab-btn active" data-tab="clientes">Clientes</button>
+            <button class="tab-btn" data-tab="cabanas">Cabañas</button>
+            <button class="tab-btn" data-tab="reservas">Reservas</button>
+            <button class="tab-btn" data-tab="pagos">Pagos</button>
+            <button class="tab-btn" data-tab="calendario">Calendario</button>
+            <button class="tab-btn" data-tab="usuarios">Usuarios</button>
+            <button class="tab-btn" data-tab="adminAccounts">Administradores</button>
+            <a href="index.html" class="btn-ghost">Cerrar sesión</a>
+        </nav>
+    </header>
+
+    <main class="dashboard-panel">
+        <section id="clientes" class="dashboard-tab active">
+            <h2>Registro manual de clientes (Recepción)</h2>
+            <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Registra un huésped desde recepción. Podrá iniciar sesión con el correo y contraseña que le asignes.</p>
+            <form id="clientForm" class="form-grid">
+                <label>Nombre <input type="text" id="clientName" required></label>
+                <label>Correo <input type="email" id="clientEmail" required></label>
+                <label>Contraseña temporal <input type="text" id="clientPassword" required minlength="4" placeholder="Mín. 4 caracteres"></label>
+                <label>Teléfono <input type="tel" id="clientPhone"></label>
+                <label>Documento <input type="text" id="clientDoc" required></label>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-bottom: 1.2rem;">Registrar cliente</button>
+            </form>
+            <div id="clientMessage" class="message"></div>
+
+            <h3 style="margin-top: 2.5rem;">Clientes registrados</h3>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Nombre</th><th>Correo</th><th>Documento</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="clientRows"></tbody>
+            </table>
+        </section>
+
+        <section id="cabanas" class="dashboard-tab">
+            <h2>Gestión de cabañas</h2>
+            <div class="table-actions">
+                <button id="addCabana" class="btn-secondary">Agregar cabaña</button>
+            </div>
+
+            <!-- Formularios ocultos por defecto -->
+            <div id="editCabanaFormContainer" class="form-panel" style="display:none; margin-top:1rem; margin-bottom: 2rem;">
+                <h3 id="editCabanaTitle" style="margin-top:0;">Editar Cabaña</h3>
+                <form id="editCabanaForm" class="form-grid">
+                    <input type="hidden" id="editCabanaId">
+                    <label>Nombre <input type="text" id="editCabanaName" required></label>
+                    <label>Tipo <input type="text" id="editCabanaType" required></label>
+                    <label>Precio <input type="text" id="editCabanaPrice" required></label>
+                    <label>Capacidad <input type="text" id="editCabanaCapacity" required></label>
+                    <label style="grid-column: 1 / -1; margin-top: 1rem;">Gestión de Galería (Fotos)
+                        <div id="cabanaPhotoGrid" style="display:flex; flex-wrap:wrap; gap:1rem; margin-top:0.6rem; margin-bottom:1rem;"></div>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <input type="text" id="newPhotoUrl" placeholder="Ejemplo: images/nueva-foto.png" style="margin-top:0;">
+                            <button type="button" id="addCabanaPhotoBtn" class="btn-secondary" style="padding:0.9rem 1.2rem; min-width:auto; margin-top:0;">Añadir Foto</button>
+                        </div>
+                    </label>
+                    <label style="grid-column: 1 / -1; margin-top: 1rem;">Descripción 
+                        <textarea id="editCabanaDesc" required rows="3" style="width:100%; box-sizing:border-box; border-radius:12px; border:1px solid var(--glass-border); background:rgba(0,0,0,0.3); color:white; padding:1rem; margin-top:0.6rem; font-family:inherit;"></textarea>
+                    </label>
+                    <div style="display:flex; gap:1rem; grid-column: 1 / -1; margin-top: 0.5rem;">
+                        <button type="submit" class="btn-primary">Guardar Cambios</button>
+                        <button type="button" id="cancelEditCabana" class="btn-ghost" style="padding: 1rem 1.5rem;">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr><th>Nombre</th><th>Capacidad</th><th>Estado</th><th>Precio</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="cabanaRows"></tbody>
+            </table>
+        </section>
+
+        <section id="reservas" class="dashboard-tab">
+            <h2>Gestión de reservas</h2>
+            <div class="card-grid">
+                <div class="info-card"><h3>Reservas activas</h3><p id="activeBookings">12</p></div>
+                <div class="info-card"><h3>Solicitudes</h3><p id="bookingRequests">5</p></div>
+                <div class="info-card"><h3>Cancelaciones</h3><p id="canceledBookings">2</p></div>
+            </div>
+            <div style="overflow-x:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Código</th><th>Huésped</th><th>Cabaña</th><th>Fechas</th><th>Pago</th><th>Estado</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="reservaRows"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section id="pagos" class="dashboard-tab">
+            <h2>Gestión de pagos</h2>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Código</th><th>Cliente</th><th>Monto</th><th>Cabaña</th><th>Método</th><th>Estado Pago</th><th>Acciones</th></tr>
+                </thead>
+                <tbody id="paymentRows">
+                </tbody>
+            </table>
+        </section>
+
+        <section id="calendario" class="dashboard-tab">
+            <h2>Gestión de Fechas y Disponibilidad</h2>
+            
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; background:rgba(0,0,0,0.3); padding:1rem 1.5rem; border-radius:12px; border:1px solid var(--glass-border);">
+                <button type="button" id="prevMonthBtn" class="btn-ghost" style="padding:0.6rem 1rem;">&#8592; Anterior</button>
+                <h3 id="calendarMonthDisplay" style="margin:0; color:white; font-size:1.4rem;">Mes</h3>
+                <button type="button" id="nextMonthBtn" class="btn-ghost" style="padding:0.6rem 1rem;">Siguiente &#8594;</button>
+            </div>
+            
+            <div id="calendarInteractiveGrid" class="calendar-interactive-grid"></div>
+
+            <div class="legend" style="margin-top:3rem;">
+                <span class="legend-item"><span class="legend-color" style="background:var(--danger)"></span>Ocupado (Huésped presente)</span>
+                <span class="legend-item"><span class="legend-color" style="background:var(--primary)"></span>Reserva Solicitada</span>
+                <span class="legend-item"><span class="legend-color" style="background:var(--success)"></span>Cabaña Libre</span>
+            </div>
+        </section>
+
+        <section id="usuarios" class="dashboard-tab">
+            <h2>Gestión de usuarios</h2>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Nombre</th><th>Correo</th><th>Historial de Reservas</th><th>Rol</th></tr>
+                </thead>
+                <tbody id="userRows"></tbody>
+            </table>
+        </section>
+
+        <section id="adminAccounts" class="dashboard-tab" data-section="adminAccountsSection">
+            <div id="adminAccountsSection">
+                <h2>Gestión de Administradores</h2>
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Agrega nuevos correos y contraseñas con permisos de administrador.</p>
+
+                <form id="addAdminForm" class="form-grid" style="margin-bottom: 2rem;">
+                    <label>Correo <input type="email" id="newAdminEmail" required></label>
+                    <label>Contraseña <input type="password" id="newAdminPassword" required minlength="4"></label>
+                    <div style="display:flex; align-items:end;">
+                        <button type="submit" class="btn-primary">Agregar Administrador</button>
+                    </div>
+                </form>
+                <p id="addAdminMessage" class="message"></p>
+
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Correo</th><th>Contraseña</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="adminAccountsRows"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
