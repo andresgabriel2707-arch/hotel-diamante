@@ -1,10 +1,15 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const app = express();
 
 // Middlewares
-app.use(cors({ origin: '*' }));
+const allowedOrigins = (process.env.CORS_ORIGINS || '*').split(',').map(o => o.trim());
+app.use(cors({ 
+    origin: allowedOrigins === '*' ? '*' : allowedOrigins,
+    credentials: true 
+}));
 app.use(express.json());
 
 // Servir el frontend (HTML, CSS, JS, imágenes) como archivos estáticos

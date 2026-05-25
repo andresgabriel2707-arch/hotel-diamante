@@ -1,7 +1,9 @@
 package com.diamante.controller;
 
 import com.diamante.dao.UsuarioDAO;
+import com.diamante.dao.ReservaDAO;
 import com.diamante.model.Usuario;
+import com.diamante.model.Reserva;
 import com.diamante.util.JsonUtil;
 import com.diamante.util.JwtUtil;
 import com.google.gson.JsonObject;
@@ -10,9 +12,8 @@ import com.sun.net.httpserver.HttpHandler;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Controlador HTTP para las rutas de autenticación (/api/auth/*).
@@ -58,7 +59,41 @@ public class AuthController {
             usuario.setDocumento(JsonUtil.getString(body, "documento", ""));
             usuario.setRol("cliente");
 
-            usuarioDAO.insertar(usuario);
+            int cabanaId = JsonUtil.getInt(body, "cabana_id", 0);
+            String llegada = JsonUtil.getString(body, "fecha_llegada", null);
+            String salida = JsonUtil.getString(body, "fecha_salida", null);
+
+            // Verificamos disponibilidad antes de registrar usuario
+            ReservaDAO reservaDAO = new ReservaDAO();
+            if (cabanaId > 0 && llegada != null && salida != null) {
+                if (!reservaDAO.estaDisponible(cabanaId, llegada, salida)) {
+                    JsonUtil.enviarRespuesta(exchange, 409, Map.of("success", false, "mensaje", "Las fechas seleccionadas ya están ocupadas para esta cabaña."));
+                    return;
+                }
+            }
+
+            int newUserId = usuarioDAO.insertar(usuario);
+
+            if (cabanaId > 0 && llegada != null && salida != null) {
+                int clienteId = usuarioDAO.obtenerClienteId(newUserId);
+                if (clienteId != -1) {
+                    String codigo = "RES-" + String.valueOf(System.currentTimeMillis()).substring(7);
+                    Reserva reserva = new Reserva();
+                    reserva.setCodigo(codigo);
+                    reserva.setClienteId(clienteId);
+                    reserva.setCabanaId(cabanaId);
+                    reserva.setHuesped(nombre);
+                    reserva.setFechaLlegada(llegada);
+                    reserva.setFechaSalida(salida);
+                    reserva.setEstado("Activa"); // Estado Activa para que se muestre en el calendario
+                    reserva.setPagoEstado("Pendiente");
+                    reserva.setTotal(0);
+                    reserva.setMetodoPago("Agencia / Externa");
+
+                    reservaDAO.insertar(reserva);
+                }
+            }
+
             JsonUtil.enviarRespuesta(exchange, 200, Map.of("success", true, "mensaje", "Registro completado. Ya puedes iniciar sesión."));
 
         } catch (Exception e) {
@@ -125,7 +160,7 @@ public class AuthController {
                 return;
             }
             List<Usuario> clientes = usuarioDAO.listarClientes();
-            JsonUtil.enviarRespuesta(exchange, 200, clientes);
+            JsonUtil.enviarRespuesta(exchange, 200, adaptarUsuarios(clientes));
         } catch (Exception e) {
             System.err.println("Error en getUsers: " + e.getMessage());
             JsonUtil.enviarRespuesta(exchange, 500, Map.of("success", false));
@@ -148,7 +183,7 @@ public class AuthController {
                 return;
             }
             List<Usuario> admins = usuarioDAO.listarAdmins();
-            JsonUtil.enviarRespuesta(exchange, 200, admins);
+            JsonUtil.enviarRespuesta(exchange, 200, adaptarUsuarios(admins));
         } catch (Exception e) {
             JsonUtil.enviarRespuesta(exchange, 500, Map.of("success", false));
         }
@@ -231,4 +266,19 @@ public class AuthController {
             JsonUtil.enviarRespuesta(exchange, 500, Map.of("success", false));
         }
     };
+
+    // Helper: adaptar campos para el frontend (_id en lugar de id)
+    private static List<Map<String, Object>> adaptarUsuarios(List<Usuario> usuarios) {
+        return usuarios.stream().map(u -> {
+            Map<String, Object> m = new LinkedHashMap<>();
+            m.put("_id", String.valueOf(u.getId()));
+            m.put("nombre", u.getNombre());
+            m.put("correo", u.getCorreo());
+            m.put("edad", u.getEdad());
+            m.put("documento", u.getDocumento());
+            m.put("rol", u.getRol());
+            m.put("creado_en", u.getCreadoEn());
+            return m;
+        }).collect(Collectors.toList());
+    }
 }

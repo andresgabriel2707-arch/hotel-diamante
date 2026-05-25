@@ -35,7 +35,9 @@ router.get('/mis-reservas', verifyAuth, (req, res) => {
 // POST /api/reservas/check — anti-overbooking
 router.post('/check', (req, res) => {
     const { cabana_id, fecha_llegada, fecha_salida } = req.body;
+    console.log('📋 POST /check recibido:', { cabana_id, fecha_llegada, fecha_salida });
     if (!cabana_id || !fecha_llegada || !fecha_salida) {
+        console.log('❌ Faltan datos en la solicitud');
         return res.status(400).json({ available: false, mensaje: 'Faltan datos.' });
     }
     if (fecha_llegada >= fecha_salida) {

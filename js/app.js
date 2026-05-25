@@ -7,6 +7,17 @@ const API = 'http://localhost:3000/api';
 const getToken = () => localStorage.getItem('diamante_jwt');
 const authHeaders = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}` });
 
+// ✅ VALIDADORES FRONTEND
+const isValidEmail = (email) => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email.trim());
+};
+
+const isStrongPassword = (pwd) => {
+    // Mínimo 8 caracteres, 1 mayúscula, 1 número
+    return pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
+};
+
 // ── Cabañas ──────────────────────────────────────────────────
 const getCabanas = async () => {
     try {
@@ -24,6 +35,14 @@ const saveCabanas = async (cabana) => {
             method: 'PUT', headers: authHeaders(), body: JSON.stringify(cabana)
         });
     } catch(e) { console.error('Error guardando cabaña', e); }
+};
+
+const createCabana = async (cabana) => {
+    try {
+        await fetch(`${API}/cabanas`, {
+            method: 'POST', headers: authHeaders(), body: JSON.stringify(cabana)
+        });
+    } catch(e) { console.error('Error creando cabaña', e); }
 };
 
 // ── Reservas ─────────────────────────────────────────────────
@@ -72,9 +91,27 @@ const getRegisteredUsers = async () => {
 
 const registerUser = async (data) => {
     try {
+        // ✅ VALIDAR CORREO
+        if (!isValidEmail(data.correo)) {
+            return { success: false, mensaje: 'Correo inválido. Usa formato: usuario@dominio.com' };
+        }
+        
+        // ✅ VALIDAR CONTRASEÑA
+        if (!isStrongPassword(data.contrasena)) {
+            return { success: false, mensaje: 'Contraseña debe tener: mín. 8 caracteres, 1 mayúscula, 1 número' };
+        }
+        
+        const payload = { 
+            nombre: data.nombre, correo: data.correo.toLowerCase(), contrasena: data.contrasena, 
+            edad: data.edad, documento: data.documento 
+        };
+        if (data.cabana_id) payload.cabana_id = data.cabana_id;
+        if (data.fecha_llegada) payload.fecha_llegada = data.fecha_llegada;
+        if (data.fecha_salida) payload.fecha_salida = data.fecha_salida;
+
         const r = await fetch(`${API}/auth/register`, {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nombre: data.nombre, correo: data.correo, contrasena: data.contrasena, edad: data.edad, documento: data.documento })
+            body: JSON.stringify(payload)
         });
         return await r.json();
     } catch { return { success: false, mensaje: 'No se pudo conectar al servidor.' }; }
@@ -174,7 +211,9 @@ const initAdminAccounts = () => {
         msg.className = 'message';
 
         if (!correo || !contrasena) { msg.textContent = 'Ambos campos son obligatorios.'; return; }
-        if (contrasena.length < 4) { msg.textContent = 'La contraseña debe tener al menos 4 caracteres.'; return; }
+        if (contrasena.length < 8) { msg.textContent = 'La contraseña debe tener al menos 8 caracteres.'; return; }
+        if (!/[A-Z]/.test(contrasena)) { msg.textContent = 'La contraseña debe tener al menos 1 mayúscula.'; return; }
+        if (!/\d/.test(contrasena)) { msg.textContent = 'La contraseña debe tener al menos 1 número.'; return; }
 
         const result = await saveAdminAccounts(correo, contrasena);
         if (result.success) {
@@ -193,6 +232,8 @@ const initAdminAccounts = () => {
 const initHome = async () => {
     const cards = document.getElementById('cabañaCards');
     const filter = document.getElementById('filterType');
+    const form = document.getElementById('checkAvailabilityForm');
+    const resultDiv = document.getElementById('availabilityResult');
     let allCabanas = [];
 
     const renderCards = (lista) => {
@@ -208,18 +249,97 @@ const initHome = async () => {
         });
     };
 
-    if (cards && filter) {
-        cards.innerHTML = '<p style="text-align:center; width:100%;">Cargando disponibilidad...</p>';
+    if (filter) {
+        // Cargar cabañas desde la BD y llenar el <select>
         allCabanas = await getCabanas();
-        renderCards(allCabanas);
-
-        filter.addEventListener('change', () => {
-            const tipo = filter.value;
-            const filtradas = allCabanas.filter(c => tipo === 'todas' || c.tipo === tipo);
-            renderCards(filtradas);
+        filter.innerHTML = '<option value="">— Selecciona una cabaña —</option>';
+        allCabanas.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c._id || c.id;
+            opt.textContent = `${c.nombre} — ${c.tipo} (${c.precio})`;
+            filter.appendChild(opt);
         });
+
+        // Mostrar todas las cabañas inicialmente
+        if (cards) renderCards(allCabanas);
+
+        // Establecer fecha mínima = hoy
+        const hoy = new Date().toISOString().split('T')[0];
+        const inputLlegada = document.getElementById('checkLlegada');
+        const inputSalida = document.getElementById('checkSalida');
+        if (inputLlegada) inputLlegada.min = hoy;
+        if (inputSalida) inputSalida.min = hoy;
+
+        // Cuando cambie la fecha de llegada, ajustar mínimo de salida
+        if (inputLlegada && inputSalida) {
+            inputLlegada.addEventListener('change', () => {
+                inputSalida.min = inputLlegada.value;
+                if (inputSalida.value && inputSalida.value <= inputLlegada.value) {
+                    inputSalida.value = '';
+                }
+            });
+        }
     }
 
+    // Manejar el formulario de consulta de disponibilidad
+    if (form && resultDiv) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const cabanaId = filter.value;
+            const llegada = document.getElementById('checkLlegada').value;
+            const salida = document.getElementById('checkSalida').value;
+
+            if (!cabanaId || !llegada || !salida) {
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.style.color = '#856404';
+                resultDiv.textContent = '⚠️ Selecciona una cabaña y ambas fechas.';
+                return;
+            }
+
+            if (llegada >= salida) {
+                resultDiv.style.background = '#fff3cd';
+                resultDiv.style.color = '#856404';
+                resultDiv.textContent = '⚠️ La fecha de llegada debe ser anterior a la de salida.';
+                return;
+            }
+
+            // Consultar disponibilidad al backend (JDBC → MySQL)
+            const btn = form.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Consultando...';
+            resultDiv.textContent = '';
+            resultDiv.style.background = 'transparent';
+
+            try {
+                const res = await fetch(`${API}/reservas/check`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ cabana_id: cabanaId, fecha_llegada: llegada, fecha_salida: salida })
+                });
+                const data = await res.json();
+
+                if (data.available) {
+                    resultDiv.style.background = '#d4edda';
+                    resultDiv.style.color = '#155724';
+                    resultDiv.innerHTML = '✅ ¡Fechas disponibles! Redirigiendo a reservas...';
+                    setTimeout(() => {
+                        window.location.href = `cabanas.html?cabana=${cabanaId}&llegada=${llegada}&salida=${salida}`;
+                    }, 1000);
+                } else {
+                    resultDiv.style.background = '#f8d7da';
+                    resultDiv.style.color = '#721c24';
+                    resultDiv.textContent = '❌ ' + (data.mensaje || 'Esas fechas no están disponibles para esta cabaña.');
+                }
+            } catch (err) {
+                resultDiv.style.background = '#f8d7da';
+                resultDiv.style.color = '#721c24';
+                resultDiv.textContent = '❌ Error al conectar con el servidor.';
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Consultar disponibilidad';
+        });
+    }
 };
 
 const initCabanasPage = async () => {
@@ -254,20 +374,64 @@ const initCabanasPage = async () => {
         </article>
     `).join('');
 
+    // Pre-llenar formulario si viene de la página de inicio o tiene una reserva pendiente
+    const urlParams = new URLSearchParams(window.location.search);
+    const presetCabana = urlParams.get('cabana') || sessionStorage.getItem('pending_reserva_cabana');
+    const presetLlegada = urlParams.get('llegada') || sessionStorage.getItem('pending_reserva_llegada');
+    const presetSalida = urlParams.get('salida') || sessionStorage.getItem('pending_reserva_salida');
+    const hasPendingReserva = !!sessionStorage.getItem('pending_reserva_cabana');
+
+    if (presetCabana) {
+        // Le damos un poco de tiempo para que el DOM se asiente
+        setTimeout(() => {
+            const formToPreset = document.querySelector(`.cabana-reserve-form[data-id="${presetCabana}"]`);
+            if (formToPreset) {
+                if (presetLlegada) formToPreset.querySelector('.llegada').value = presetLlegada;
+                if (presetSalida) formToPreset.querySelector('.salida').value = presetSalida;
+                
+                // Resaltar la tarjeta para que el usuario la vea claramente
+                const card = formToPreset.closest('.card');
+                if (card) {
+                    card.style.border = '2px solid var(--primary)';
+                    card.style.boxShadow = '0 0 15px rgba(212, 175, 55, 0.5)';
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+
+                // Si hay reserva pendiente y ya estamos autenticados, ¡dispararla automáticamente!
+                if (hasPendingReserva && isAuthenticated()) {
+                    sessionStorage.removeItem('pending_reserva_cabana');
+                    sessionStorage.removeItem('pending_reserva_llegada');
+                    sessionStorage.removeItem('pending_reserva_salida');
+                    
+                    const msg = formToPreset.querySelector('.res-msg');
+                    msg.textContent = 'Procesando tu reserva pendiente...';
+                    msg.style.color = 'var(--primary)';
+                    
+                    formToPreset.querySelector('button').click();
+                }
+            }
+        }, 100);
+    }
+
     document.querySelectorAll('.cabana-reserve-form').forEach(form => {
         form.addEventListener('submit', async e => {
             e.preventDefault();
-            if (!isAuthenticated()) {
-                // Guardar destino en sesión y en la URL para que sobreviva las redirecciones
-                sessionStorage.setItem('reserva_returnTo', 'cabanas.html');
-                window.location.href = 'login.html?returnTo=cabanas.html';
-                return;
-            }
-            const btn = form.querySelector('button');
-            const msg = form.querySelector('.res-msg');
             const llegada = form.querySelector('.llegada').value;
             const salida = form.querySelector('.salida').value;
             const cabanaId = form.dataset.id;
+            
+            if (!isAuthenticated()) {
+                // Guardar destino en sesión y datos de reserva para retomarla
+                sessionStorage.setItem('reserva_returnTo', 'cabanas.html');
+                sessionStorage.setItem('pending_reserva_cabana', cabanaId);
+                sessionStorage.setItem('pending_reserva_llegada', llegada);
+                sessionStorage.setItem('pending_reserva_salida', salida);
+                window.location.href = 'login.html?returnTo=cabanas.html';
+                return;
+            }
+            
+            const btn = form.querySelector('button');
+            const msg = form.querySelector('.res-msg');
             
             btn.disabled = true;
             btn.textContent = 'Verificando...';
@@ -483,6 +647,15 @@ const initClientManagement = () => {
 
     renderClients();
 
+    // Cargar cabañas para el select de reserva obligatoria
+    const cabanaSelect = document.getElementById('clientCabanaId');
+    if (cabanaSelect) {
+        getCabanas().then(cabanas => {
+            cabanaSelect.innerHTML = '<option value="">— Selecciona cabaña —</option>' + 
+                cabanas.map(c => `<option value="${c.id || c._id}">${c.nombre}</option>`).join('');
+        });
+    }
+
     form.addEventListener('submit', async e => {
         e.preventDefault();
         msg.textContent = '';
@@ -495,15 +668,82 @@ const initClientManagement = () => {
         const nombre = document.getElementById('clientName').value.trim();
         const documento = document.getElementById('clientDoc').value.trim();
 
-        if (contrasena.length < 4) { msg.textContent = 'La contraseña debe tener al menos 4 caracteres.'; formBtn.disabled = false; return; }
+        if (contrasena.length < 8) { 
+            msg.textContent = 'La contraseña debe tener al menos 8 caracteres.'; 
+            msg.classList.add('error');
+            formBtn.disabled = false; 
+            return; 
+        }
+        if (!/[A-Z]/.test(contrasena)) { 
+            msg.textContent = 'La contraseña debe tener al menos 1 mayúscula.'; 
+            msg.classList.add('error');
+            formBtn.disabled = false; 
+            return; 
+        }
+        if (!/\d/.test(contrasena)) { 
+            msg.textContent = 'La contraseña debe tener al menos 1 número.'; 
+            msg.classList.add('error');
+            formBtn.disabled = false; 
+            return; 
+        }
 
         const data = { nombre, correo, contrasena, documento, edad: '', telefono: document.getElementById('clientPhone') ? document.getElementById('clientPhone').value : '' };
+
+        // Adjuntar datos de reserva obligatoria
+        data.cabana_id = cabanaSelect.value;
+        data.fecha_llegada = document.getElementById('clientLlegada').value;
+        data.fecha_salida = document.getElementById('clientSalida').value;
+        
+        if (!data.cabana_id || !data.fecha_llegada || !data.fecha_salida) {
+            msg.textContent = 'Completa todos los campos de la reserva manual.';
+            msg.classList.add('error');
+            formBtn.disabled = false;
+            return;
+        }
+
+        // Guardar sesión actual del admin
+        const adminJwt = localStorage.getItem('diamante_jwt');
+        const adminRole = localStorage.getItem('diamante_role');
+        const adminNombre = localStorage.getItem('diamante_nombre');
+
+        // 1. Registrar usuario
         const res = await registerUser(data);
         if(res.success) {
-            renderClients();
-            form.reset();
-            msg.textContent = `Cliente "${nombre}" registrado.`;
-            msg.classList.add('success');
+            // 2. Login automático con el nuevo usuario
+            const loginRes = await login(correo, contrasena);
+            if (loginRes.success) {
+                // 3. Crear reserva usando el JWT del huésped
+                const reservaData = {
+                    cabana_id: data.cabana_id,
+                    huesped: nombre,
+                    llegada: data.fecha_llegada,
+                    salida: data.fecha_salida,
+                    monto: 0,
+                    metodoPago: 'Por definir'
+                };
+                const reservaRes = await reserveCabana(reservaData);
+                // 4. Restaurar sesión del admin
+                localStorage.setItem('diamante_jwt', adminJwt);
+                localStorage.setItem('diamante_role', adminRole);
+                localStorage.setItem('diamante_nombre', adminNombre);
+
+                if (reservaRes.success) {
+                    renderClients();
+                    form.reset();
+                    msg.textContent = `Cliente "${nombre}" y su reserva fueron registrados exitosamente.`;
+                    msg.classList.add('success');
+                } else {
+                    msg.textContent = `Cliente registrado, pero error al crear la reserva: ${reservaRes.mensaje || 'Error'}`;
+                    msg.classList.add('error');
+                }
+            } else {
+                // No se pudo loguear el huésped
+                localStorage.setItem('diamante_jwt', adminJwt);
+                localStorage.setItem('diamante_role', adminRole);
+                localStorage.setItem('diamante_nombre', adminNombre);
+                msg.textContent = `Cliente registrado, pero no se pudo crear la reserva (falló login automático).`;
+                msg.classList.add('error');
+            }
         } else {
             msg.textContent = res.mensaje || 'Error al registrar.';
             msg.classList.add('error');
@@ -533,6 +773,7 @@ const initAdminTabs = () => {
     const editContainer = document.getElementById('editCabanaFormContainer');
     const editForm = document.getElementById('editCabanaForm');
     let currentData = [];
+    let currentCabanaPhotos = [];
 
     const renderAdminTable = (data) => {
         if(!cabanaRows) return;
@@ -540,11 +781,11 @@ const initAdminTabs = () => {
         data.forEach(c => {
             const row = document.createElement('tr');
             const badgeClass = c.estado === 'Disponible' ? 'success' : (c.estado === 'Ocupado' ? 'danger' : 'primary');
-            row.innerHTML = `<td>${c.nombre}</td><td>${c.capacidad}</td><td style="color: var(--${badgeClass})">${c.estado}</td><td>${c.precio}</td><td><button class="btn-ghost edit-btn" data-id="${c.id}">Editar</button></td>`;
+            row.innerHTML = `<td>${c.nombre}</td><td>${c.capacidad}</td><td style="color: var(--${badgeClass})">${c.estado}</td><td>${c.precio}</td><td><button class="btn-ghost edit-btn" data-id="${c._id}">Editar</button></td>`;
             cabanaRows.appendChild(row);
         });
 
-        let currentCabanaPhotos = [];
+        currentCabanaPhotos = [];
         const renderCabanaPhotos = () => {
             const grid = document.getElementById('cabanaPhotoGrid');
             if(!grid) return;
@@ -582,11 +823,11 @@ const initAdminTabs = () => {
 
         document.querySelectorAll('.edit-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const id = parseInt(e.target.dataset.id);
-                const cabana = currentData.find(x => x.id === id);
+                const id = e.target.dataset.id;
+                const cabana = currentData.find(x => x._id === id);
                 if(cabana && editContainer) {
                     editContainer.style.display = 'block';
-                    document.getElementById('editCabanaId').value = cabana.id;
+                    document.getElementById('editCabanaId').value = cabana._id;
                     document.getElementById('editCabanaName').value = cabana.nombre;
                     document.getElementById('editCabanaType').value = cabana.tipo;
                     document.getElementById('editCabanaPrice').value = cabana.precio;
@@ -611,6 +852,27 @@ const initAdminTabs = () => {
         });
     }
 
+    const addCabanaBtn = document.getElementById('addCabana');
+    if (addCabanaBtn) {
+        addCabanaBtn.addEventListener('click', () => {
+            if (editContainer) {
+                editContainer.style.display = 'block';
+                document.getElementById('editCabanaId').value = 'new';
+                document.getElementById('editCabanaName').value = '';
+                document.getElementById('editCabanaType').value = 'Estándar';
+                document.getElementById('editCabanaPrice').value = '';
+                document.getElementById('editCabanaCapacity').value = '2';
+                document.getElementById('editCabanaDesc').value = '';
+                document.getElementById('editCabanaTitle').textContent = 'Agregar Nueva Cabaña';
+                
+                currentCabanaPhotos = [];
+                renderCabanaPhotos();
+                
+                editContainer.scrollIntoView({behavior: 'smooth', block: 'center'});
+            }
+        });
+    }
+
     if(editForm) {
         document.getElementById('cancelEditCabana').addEventListener('click', () => {
             editContainer.style.display = 'none';
@@ -623,23 +885,47 @@ const initAdminTabs = () => {
 
             await new Promise(r => setTimeout(r, 100));
 
-            const id = parseInt(document.getElementById('editCabanaId').value);
-            const idx = currentData.findIndex(x => x.id === id);
-            if(idx >= 0) {
-                currentData[idx].nombre = document.getElementById('editCabanaName').value;
-                currentData[idx].tipo = document.getElementById('editCabanaType').value;
-                currentData[idx].precio = document.getElementById('editCabanaPrice').value;
-                currentData[idx].capacidad = document.getElementById('editCabanaCapacity').value;
-                currentData[idx].descripcion = document.getElementById('editCabanaDesc').value;
-                currentData[idx].fotos = [...currentCabanaPhotos];
+            const idVal = document.getElementById('editCabanaId').value;
+            
+            let rawPrice = document.getElementById('editCabanaPrice').value;
+            rawPrice = rawPrice.replace(/[^0-9.-]+/g, '');
+            const numPrice = parseFloat(rawPrice) || 0;
+            
+            if(idVal === 'new') {
+                const newCabana = {
+                    nombre: document.getElementById('editCabanaName').value,
+                    tipo: document.getElementById('editCabanaType').value,
+                    precio: numPrice,
+                    capacidad: parseInt(document.getElementById('editCabanaCapacity').value) || 2,
+                    descripcion: document.getElementById('editCabanaDesc').value,
+                    fotos: [...currentCabanaPhotos],
+                    estado: 'Disponible'
+                };
+                await createCabana(newCabana);
+                alert('Cabaña agregada correctamente.');
+            } else {
+                const id = idVal;
+                const idx = currentData.findIndex(x => x._id === id);
+                if(idx >= 0) {
+                    currentData[idx].nombre = document.getElementById('editCabanaName').value;
+                    currentData[idx].tipo = document.getElementById('editCabanaType').value;
+                    currentData[idx].precio = numPrice;
+                    currentData[idx].capacidad = parseInt(document.getElementById('editCabanaCapacity').value) || 2;
+                    currentData[idx].descripcion = document.getElementById('editCabanaDesc').value;
+                    currentData[idx].fotos = [...currentCabanaPhotos];
+                    
+                    await saveCabanas(currentData[idx]);
+                    alert('Cabaña actualizada correctamente y guardada.');
+                }
             }
 
-            saveCabanas(currentData);
+            // Recargar datos desde la base de datos para asegurar consistencia
+            currentData = await getCabanas();
             renderAdminTable(currentData);
+
             btn.textContent = 'Guardar Cambios';
             btn.disabled = false;
             editContainer.style.display = 'none';
-            alert('Cabaña actualizada correctamente y guardada.');
         });
     }
 

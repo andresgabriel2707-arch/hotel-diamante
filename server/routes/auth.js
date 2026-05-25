@@ -2,9 +2,24 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const db = require('../db');
 
-const JWT_SECRET = 'diamante_secret_2026_safe';
+const JWT_SECRET = process.env.JWT_SECRET || 'diamante_secret_2026_development_only';
+
+// Rate limiter para login (DESACTIVADO PARA PRUEBAS)
+const loginLimiter = (req, res, next) => next();
+
+// Validadores
+function isValidEmail(email) {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email.trim());
+}
+
+function isStrongPassword(pwd) {
+    // Mínimo 8 caracteres, 1 mayúscula, 1 número
+    return pwd.length >= 8 && /[A-Z]/.test(pwd) && /\d/.test(pwd);
+}
 
 // POST /api/auth/register
 router.post('/register', (req, res) => {
@@ -12,6 +27,20 @@ router.post('/register', (req, res) => {
     if (!nombre || !correo || !contrasena) {
         return res.status(400).json({ success: false, mensaje: 'Nombre, correo y contraseña son obligatorios.' });
     }
+    
+    // ✅ Validar correo
+    if (!isValidEmail(correo)) {
+        return res.status(400).json({ success: false, mensaje: 'Correo inválido. Usa formato: usuario@dominio.com' });
+    }
+    
+    // ✅ Validar contraseña
+    if (!isStrongPassword(contrasena)) {
+        return res.status(400).json({ 
+            success: false, 
+            mensaje: 'Contraseña debe tener: mín. 8 caracteres, 1 mayúscula, 1 número' 
+        });
+    }
+    
     const hash = bcrypt.hashSync(contrasena, 10);
     db.usuarios.insert({ nombre, correo: correo.toLowerCase(), password_hash: hash, rol: 'cliente', edad, documento }, (err) => {
         if (err && err.errorType === 'uniqueViolated') {
@@ -23,7 +52,7 @@ router.post('/register', (req, res) => {
 });
 
 // POST /api/auth/login
-router.post('/login', (req, res) => {
+router.post('/login', loginLimiter, (req, res) => {
     const { correo, contrasena } = req.body;
     if (!correo || !contrasena) {
         return res.status(400).json({ success: false, mensaje: 'Correo y contraseña son obligatorios.' });

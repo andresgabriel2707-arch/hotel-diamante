@@ -85,6 +85,8 @@ public class Main {
             // /api/cabanas → listar, /api/cabanas/123 → actualizar
             if ("/api/cabanas".equals(path) && "GET".equals(method)) {
                 CabanaController.listar.handle(exchange);
+            } else if ("/api/cabanas".equals(path) && "POST".equals(method)) {
+                CabanaController.crear.handle(exchange);
             } else if (path.matches("/api/cabanas/\\d+") && "PUT".equals(method)) {
                 CabanaController.actualizar.handle(exchange);
             } else {

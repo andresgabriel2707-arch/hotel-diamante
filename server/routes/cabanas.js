@@ -1,3 +1,25 @@
+// POST /api/cabanas — crear nueva cabaña
+router.post('/', verifyAdmin, (req, res) => {
+    const { nombre, descripcion, tipo, capacidad, precio, estado, fotos } = req.body;
+    if (!nombre || !tipo || !capacidad || !precio) {
+        return res.status(400).json({ success: false, mensaje: 'Faltan campos obligatorios.' });
+    }
+    db.cabanas.insert({
+        nombre,
+        descripcion: descripcion || '',
+        tipo,
+        capacidad: parseInt(capacidad) || 2,
+        precio: parseFloat(precio) || 0,
+        estado: estado || 'Disponible',
+        fotos: fotos || [],
+        moneda: 'COP',
+        periodo: 'noche',
+        createdAt: new Date().toISOString()
+    }, (err, cabana) => {
+        if (err) return res.status(500).json({ success: false, mensaje: 'Error al crear cabaña.' });
+        res.json({ success: true, cabana });
+    });
+});
 const express = require('express');
 const router = express.Router();
 const db = require('../db');

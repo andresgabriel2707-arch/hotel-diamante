@@ -29,12 +29,26 @@
             <h2>Registro manual de clientes (Recepción)</h2>
             <p style="margin-bottom: 1.5rem; color: var(--text-muted);">Registra un huésped desde recepción. Podrá iniciar sesión con el correo y contraseña que le asignes.</p>
             <form id="clientForm" class="form-grid">
+                <label style="grid-column: 1 / -1; font-weight: 600; margin-bottom: 0.5rem; display: block;">Datos del Cliente</label>
                 <label>Nombre <input type="text" id="clientName" required></label>
                 <label>Correo <input type="email" id="clientEmail" required></label>
-                <label>Contraseña temporal <input type="text" id="clientPassword" required minlength="4" placeholder="Mín. 4 caracteres"></label>
+                <label>Contraseña temporal <input type="text" id="clientPassword" required minlength="8" placeholder="Mín. 8 caracteres, 1 mayús., 1 número (ej: Temporal123)"></label>
                 <label>Teléfono <input type="tel" id="clientPhone"></label>
                 <label>Documento <input type="text" id="clientDoc" required></label>
-                <button type="submit" class="btn-primary" style="width: 100%; margin-bottom: 1.2rem;">Registrar cliente</button>
+                
+                <label style="grid-column: 1 / -1; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; display: block; border-top: 1px solid var(--glass-border); padding-top: 1rem;">Datos de la Reserva</label>
+                
+                <div id="manualReservaFields" style="grid-column: 1 / -1; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: 12px; margin-bottom: 1rem;">
+                    <label style="display: block;">Cabaña a asignar
+                        <select id="clientCabanaId" required style="width: 100%; padding: 0.8rem; margin-top: 0.5rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); color: white;">
+                            <option value="">— Selecciona cabaña —</option>
+                        </select>
+                    </label>
+                    <label style="display: block;">Fecha de llegada <input type="date" id="clientLlegada" required style="width: 100%; padding: 0.8rem; margin-top: 0.5rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); color: white;"></label>
+                    <label style="display: block;">Fecha de salida <input type="date" id="clientSalida" required style="width: 100%; padding: 0.8rem; margin-top: 0.5rem; border-radius: 8px; border: 1px solid var(--glass-border); background: rgba(0,0,0,0.5); color: white;"></label>
+                </div>
+
+                <button type="submit" class="btn-primary" style="grid-column: 1 / -1; width: 100%; margin-bottom: 1.2rem;">Registrar cliente (y reserva si aplica)</button>
             </form>
             <div id="clientMessage" class="message"></div>
 
@@ -150,7 +164,7 @@
 
                 <form id="addAdminForm" class="form-grid" style="margin-bottom: 2rem;">
                     <label>Correo <input type="email" id="newAdminEmail" required></label>
-                    <label>Contraseña <input type="password" id="newAdminPassword" required minlength="4"></label>
+                    <label>Contraseña <input type="password" id="newAdminPassword" required minlength="8" placeholder="Mín. 8 caracteres, 1 mayús., 1 número"></label>
                     <div style="display:flex; align-items:end;">
                         <button type="submit" class="btn-primary">Agregar Administrador</button>
                     </div>

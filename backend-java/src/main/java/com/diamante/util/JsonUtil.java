@@ -62,14 +62,28 @@ public class JsonUtil {
      * Helper: obtener un int seguro de un JsonObject.
      */
     public static int getInt(JsonObject obj, String key, int defaultValue) {
-        return obj.has(key) && !obj.get(key).isJsonNull() ? obj.get(key).getAsInt() : defaultValue;
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return defaultValue;
+        try {
+            String val = obj.get(key).getAsString();
+            if (val.isEmpty()) return defaultValue;
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     /**
      * Helper: obtener un double seguro de un JsonObject.
      */
     public static double getDouble(JsonObject obj, String key, double defaultValue) {
-        return obj.has(key) && !obj.get(key).isJsonNull() ? obj.get(key).getAsDouble() : defaultValue;
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return defaultValue;
+        try {
+            String val = obj.get(key).getAsString();
+            if (val.isEmpty()) return defaultValue;
+            return Double.parseDouble(val);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     /**

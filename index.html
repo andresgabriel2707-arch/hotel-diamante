@@ -33,47 +33,63 @@
             </div>
         </section>
 
-        <section id="disponibilidad" class="section-panel bg-white">
-            <div class="section-panel-content">
-                <div class="section-header">
-                    <h2>Consulta de disponibilidad</h2>
-                    <p>Explora nuestras cabañas disponibles y sus detalles.</p>
+        <section id="disponibilidad" class="section-panel" style="padding: 5rem 10%; position: relative;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at bottom left, rgba(212, 175, 55, 0.05), transparent 50%); pointer-events: none;"></div>
+            
+            <div class="section-panel-content" style="background: rgba(25, 25, 30, 0.4); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 3rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); text-align: center; max-width: 900px; margin: 0 auto; position: relative; z-index: 1;">
+                <div class="section-header" style="margin-bottom: 2rem;">
+                    <h2 style="font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(135deg, #fff 0%, #d4af37 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Consulta de disponibilidad</h2>
+                    <p style="color: var(--text-muted); font-size: 1.1rem;">Selecciona una cabaña y las fechas para verificar disponibilidad en tiempo real.</p>
                 </div>
-                <div class="filter-panel">
-                <label>Tipo de cabaña:
-                    <select id="filterType">
-                        <option value="todas">Todas</option>
-                        <option value="suite">Diamante 1</option>
-                        <option value="familiar">Diamante 2</option>
-                        <option value="romantica">Diamante 3</option>
-                    </select>
-                </label>
-            </div>
-                <div class="cards" id="cabañaCards"></div>
+                <form id="checkAvailabilityForm" class="availability-form" style="display: flex; flex-direction: column; gap: 1.5rem; max-width: 650px; margin: 0 auto;">
+                    <div style="text-align: left;">
+                        <label style="font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Cabaña
+                            <select id="filterType" required style="width: 100%; padding: 1rem; margin-top: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 12px; color: #fff; font-size: 1rem; outline: none; transition: border-color 0.3s ease;">
+                                <option value="" style="color: #000;">— Selecciona una cabaña —</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 1.5rem;">
+                        <label style="flex: 1; text-align: left; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Llegada
+                            <input type="date" id="checkLlegada" required style="width: 100%; padding: 1rem; margin-top: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 12px; color: #fff; font-size: 1rem; outline: none; box-sizing: border-box; transition: border-color 0.3s ease;">
+                        </label>
+                        <label style="flex: 1; text-align: left; font-size: 0.9rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px;">Salida
+                            <input type="date" id="checkSalida" required style="width: 100%; padding: 1rem; margin-top: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 12px; color: #fff; font-size: 1rem; outline: none; box-sizing: border-box; transition: border-color 0.3s ease;">
+                        </label>
+                    </div>
+                    <button type="submit" class="btn-primary" style="padding: 1rem; font-size: 1.1rem; letter-spacing: 1px; margin-top: 1rem; text-transform: uppercase;">Comprobar Fechas</button>
+                    <div id="availabilityResult" style="min-height: 2.5rem; display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 1rem; padding: 0.8rem; border-radius: 12px; transition: all 0.3s ease;"></div>
+                </form>
+                <div class="cards" id="cabañaCards" style="margin-top: 2rem;"></div>
             </div>
         </section>
 
-
-
-        <section id="acerca" class="section-panel bg-white">
-            <div class="section-panel-content">
-                <div class="section-header">
-                    <h2>Acerca de la empresa</h2>
-                    <p>Somos una experiencia hotelera que combina confort y naturaleza para viajeros exigentes.</p>
+        <section id="experiencias" style="padding: 5rem 10%; border-top: 1px solid var(--glass-border);">
+            <div class="section-header" style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-size: 2.5rem; color: var(--primary);">Descubre el Diamante</h2>
+                <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">No solo ofrecemos hospedaje, te brindamos una experiencia inolvidable rodeado de la majestuosidad de Macanal.</p>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                <!-- Card 1 -->
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2rem; text-align: center; transition: transform 0.3s ease, background 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.background='rgba(255, 255, 255, 0.05)';" onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.02)';">
+                    <div style="width: 70px; height: 70px; margin: 0 auto 1.5rem auto; background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">🌄</div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 1rem;">Vistas Increíbles</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">Despierta cada mañana con la mejor panorámica del embalse directamente desde la ventana de tu cabaña.</p>
                 </div>
-                <div class="info-cards">
-                <div class="info-card">
-                    <h3>Atención personalizada</h3>
-                    <p>Gestión de reservas, pagos y soporte para cada cliente.</p>
+                
+                <!-- Card 2 -->
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2rem; text-align: center; transition: transform 0.3s ease, background 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.background='rgba(255, 255, 255, 0.05)';" onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.02)';">
+                    <div style="width: 70px; height: 70px; margin: 0 auto 1.5rem auto; background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">🛀</div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 1rem;">Confort Premium</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">Interiores diseñados para el descanso máximo, camas de lujo, jacuzzi y atención personalizada 24/7.</p>
                 </div>
-                <div class="info-card">
-                    <h3>Infraestructura</h3>
-                    <p>Cabañas equipadas, espacios seguros y servicios exclusivos.</p>
-                </div>
-                <div class="info-card">
-                    <h3>Fácil acceso</h3>
-                    <p>Plataforma interactiva con navegación clara y funcionalidad móvil.</p>
-                    </div>
+                
+                <!-- Card 3 -->
+                <div style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 20px; padding: 2rem; text-align: center; transition: transform 0.3s ease, background 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'; this.style.background='rgba(255, 255, 255, 0.05)';" onmouseout="this.style.transform='translateY(0)'; this.style.background='rgba(255, 255, 255, 0.02)';">
+                    <div style="width: 70px; height: 70px; margin: 0 auto 1.5rem auto; background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(212, 175, 55, 0)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem;">🍃</div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 1rem;">Naturaleza y Paz</h3>
+                    <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.6;">Desconéctate de la ciudad y sumérgete en un ambiente de total relajación, aire puro y privacidad absoluta.</p>
                 </div>
             </div>
         </section>

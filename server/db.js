@@ -32,9 +32,9 @@ db.usuarios.findOne({ correo: 'admin@diamante.com' }, (err, doc) => {
 db.cabanas.count({}, (err, count) => {
     if (count === 0) {
         db.cabanas.insert([
-            { nombre: 'Diamante 1', descripcion: 'Cabaña romántica con vista al río.', tipo: 'Romántica', capacidad: 2, precio: '$350.000/noche', estado: 'Disponible', fotos: [] },
-            { nombre: 'Diamante 2', descripcion: 'Cabaña familiar con amplia terraza.',  tipo: 'Familiar',  capacidad: 6, precio: '$550.000/noche', estado: 'Disponible', fotos: [] },
-            { nombre: 'Diamante 3', descripcion: 'Cabaña de lujo con jacuzzi.',          tipo: 'Lujo',      capacidad: 4, precio: '$750.000/noche', estado: 'Disponible', fotos: [] },
+            { nombre: 'Diamante 1', descripcion: 'Cabaña romántica con vista al río.', tipo: 'Romántica', capacidad: 2, precio: 350000, moneda: 'COP', periodo: 'noche', estado: 'Disponible', fotos: [] },
+            { nombre: 'Diamante 2', descripcion: 'Cabaña familiar con amplia terraza.',  tipo: 'Familiar',  capacidad: 6, precio: 550000, moneda: 'COP', periodo: 'noche', estado: 'Disponible', fotos: [] },
+            { nombre: 'Diamante 3', descripcion: 'Cabaña de lujo con jacuzzi.',          tipo: 'Lujo',      capacidad: 4, precio: 750000, moneda: 'COP', periodo: 'noche', estado: 'Disponible', fotos: [] },
         ]);
         console.log('🏡  Cabañas de ejemplo insertadas.');
     }

@@ -1,4 +1,5 @@
 @REM Maven Wrapper para Windows — Hotel Diamante
+@REM Usa Java para descargar si curl/certutil no están disponibles
 @echo off
 setlocal
 
@@ -9,17 +10,23 @@ set "WRAPPER_URL=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/m
 
 if not exist "%WRAPPER_DIR%" mkdir "%WRAPPER_DIR%"
 
-@REM Descargar maven-wrapper.jar si no existe (usa curl integrado en Windows 10+)
+@REM Descargar maven-wrapper.jar si no existe usando Java
 if not exist "%WRAPPER_JAR%" (
-    echo Descargando Maven Wrapper...
-    curl -f -s -o "%WRAPPER_JAR%" "%WRAPPER_URL%"
+    echo Descargando Maven Wrapper usando Java...
+    java -cp . -e "" 2>nul
+    java -Xmx32m -cp "%~dp0" DownloadWrapper "%WRAPPER_URL%" "%WRAPPER_JAR%" 2>nul
+    if not exist "%WRAPPER_JAR%" (
+        echo Intentando descarga alternativa...
+        echo import java.net.*;import java.io.*;class D{public static void main(String[] a)throws Exception{try(InputStream i=new URL(a[0]).openStream();FileOutputStream o=new FileOutputStream(a[1])){byte[] b=new byte[8192];int n;while((n=i.read(b))!=-1)o.write(b,0,n);}} } > "%WRAPPER_DIR%\D.java"
+        javac "%WRAPPER_DIR%\D.java"
+        java -cp "%WRAPPER_DIR%" D "%WRAPPER_URL%" "%WRAPPER_JAR%"
+        del "%WRAPPER_DIR%\D.java" "%WRAPPER_DIR%\D.class" 2>nul
+    )
     if not exist "%WRAPPER_JAR%" (
         echo ERROR: No se pudo descargar Maven Wrapper.
-        echo Descargue manualmente: %WRAPPER_URL%
-        echo y coloquelo en: %WRAPPER_DIR%
         exit /b 1
     )
-    echo Maven Wrapper descargado.
+    echo Maven Wrapper descargado correctamente.
 )
 
 @REM Ejecutar Maven via wrapper
